@@ -28,6 +28,8 @@ data = response.json()
 
 text = ""
 this_week = ""
+next_class = ""
+next_lab = ""
 
 for i in range(len(data['events'])):
     line = f"({data['events'][i]['event_date']}) {data['events'][i]['event_name']}\n\n"
@@ -39,6 +41,10 @@ for i in range(len(data['events'])):
     if 0 <= date_difference.days <= 7:
         this_week += line
 
+    class_type = data['events'][i]['class_type']
+    if class_type == "Lecture" and date_difference.days / 24.0 >= 0 and not next_class:
+        line2 = f"{data['events'][i]['event_name']}\n{data['events'][i]['event_description']}\n\nhttps://temple.zoom.us/j/99844332204"
+        next_class += line2
 
 
 @client.event
@@ -68,5 +74,12 @@ async def on_message(message):
 
     await message.send(embed=embed)
 
+@client.command(name='nextclass')
+async def on_message(message):
+    embed = discord.Embed(title="Next Class", description="CIS 4398", color=0xA71313)
+    embed.set_footer(text="CIS 4398 - Icebreaker Group 4", icon_url= PIC)
+    embed.description = f"{next_class}"
+
+    await message.send(embed=embed)
 
 client.run(bot_token)
