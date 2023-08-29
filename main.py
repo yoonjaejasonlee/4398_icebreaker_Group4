@@ -148,6 +148,7 @@ async def on_message(message):
         embed.description = f"{message.author.name} has unsubscribed from reminders"
 
     await message.send(embed=embed)
+    
 
 send_reminders.start()
 
