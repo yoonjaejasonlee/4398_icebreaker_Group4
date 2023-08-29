@@ -77,10 +77,11 @@ async def send_reminders():
     if str(tomorrow) in events:
         embed = discord.Embed(title="Upcoming Event Reminder", description="CIS 4398", color=0xA71313)
         embed.set_footer(text="CIS 4398 - Icebreaker Group 4", icon_url=PIC)
-        embed.description = events[f"{tomorrow}"]
+        embed.description = str(tomorrow) + "\n\n" + events[f"{tomorrow}"]
         for ID in subscription_list:
             member = client.get_user(ID)
-            await member.send(embed=embed)
+            if member:
+                await member.send(embed=embed)
 
 
 @client.event
@@ -89,6 +90,8 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print("===========")
+
+    send_reminders.start()
 
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="For Love"))
 
@@ -128,6 +131,15 @@ async def on_message(message):
         save_subscriptions()
 
         embed.description = f"{message.author.name} has subscribed to reminders"
+
+        tomorrow = date1.date() + timedelta(days=1)
+        if str(tomorrow) in events:
+            sub_embed = discord.Embed(title="Upcoming Event Reminder", description="CIS 4398", color=0xA71313)
+            sub_embed.set_footer(text="CIS 4398 - Icebreaker Group 4", icon_url=PIC)
+            sub_embed.description = str(tomorrow) + "\n" + events[f"{tomorrow}"]
+
+            await message.author.send(embed=sub_embed)
+
     else:
         embed.description = f"{message.author.name} is already subscribed to reminders!"
 
@@ -150,7 +162,7 @@ async def on_message(message):
     await message.send(embed=embed)
     
 
-send_reminders.start()
+
 
 client.run(bot_token)
 
