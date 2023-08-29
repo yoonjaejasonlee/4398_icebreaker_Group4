@@ -2,7 +2,7 @@ import requests
 import discord
 import pickle
 import os
-from discord.ext import commands
+from discord.ext import commands, tasks
 from config import BOT_TOKEN, AUTH_KEY, PIC
 
 from datetime import datetime, timedelta
@@ -20,7 +20,7 @@ bot_token = BOT_TOKEN
 
 api_url = "https://courses.ianapplebaum.com/api/syllabus/4"
 headers = {
-    "Authorization": 'Bearer wj1MEuhIgxcFDp9PnML9E3elUMZwXkttWKUmA7Lk',
+    "Authorization": AUTH_KEY,
     "Content-Type": "application/json",
     "Accept": "application/json",
 }
@@ -71,20 +71,16 @@ def save_subscriptions():
 
 
 
-def send_reminders():
-    tomorrow = date1.date() + timedelta(days=2)
+@tasks.loop(hours=24)
+async def send_reminders():
+    tomorrow = date1.date() + timedelta(days=1)
     if str(tomorrow) in events:
         embed = discord.Embed(title="Upcoming Event Reminder", description="CIS 4398", color=0xA71313)
         embed.set_footer(text="CIS 4398 - Icebreaker Group 4", icon_url=PIC)
         embed.description = events[f"{tomorrow}"]
         for ID in subscription_list:
-            #member = client.get_user(ID)
-            #await member.send(embed=embed)
-
-send_reminders()
-subscription_list.append('1223233')
-save_subscriptions()
-send_reminders()
+            member = client.get_user(ID)
+            await member.send(embed=embed)
 
 
 @client.event
@@ -153,6 +149,7 @@ async def on_message(message):
 
     await message.send(embed=embed)
 
+send_reminders.start()
 
 client.run(bot_token)
 
