@@ -1,8 +1,11 @@
 import requests
 import discord
+import pickle
+import os
 from discord.ext import commands
 from config import BOT_TOKEN, AUTH_KEY, PIC
-from datetime import datetime
+
+from datetime import datetime, timedelta
 from datetime import date
 
 today_year = date.today().year
@@ -17,7 +20,7 @@ bot_token = BOT_TOKEN
 
 api_url = "https://courses.ianapplebaum.com/api/syllabus/4"
 headers = {
-    "Authorization": AUTH_KEY,
+    "Authorization": 'Bearer wj1MEuhIgxcFDp9PnML9E3elUMZwXkttWKUmA7Lk',
     "Content-Type": "application/json",
     "Accept": "application/json",
 }
@@ -28,12 +31,19 @@ data = response.json()
 
 text = ""
 this_week = ""
+
 next_class = ""
 next_lab = ""
+
+subscription_list = []
+events = {}
+
 
 for i in range(len(data['events'])):
     line = f"({data['events'][i]['event_date']}) {data['events'][i]['event_name']}\n\n"
     text += line
+
+    events[data['events'][i]['event_date']] = f"{data['events'][i]['event_name']}\n{data['events'][i]['event_description']}\n\nhttps://temple.zoom.us/j/99844332204"
 
     year, month, day = map(int, data['events'][i]['event_date'].split("-"))
     date2 = datetime(year, month, day)
@@ -45,6 +55,36 @@ for i in range(len(data['events'])):
     if class_type == "Lecture" and date_difference.days / 24.0 >= 0 and not next_class:
         line2 = f"{data['events'][i]['event_name']}\n{data['events'][i]['event_description']}\n\nhttps://temple.zoom.us/j/99844332204"
         next_class += line2
+
+
+
+if (os.path.isfile("subscriptions")):
+    subscription_file = open('subscriptions','rb')
+    subscription_list = pickle.load(subscription_file)
+    subscription_file.close()
+
+
+def save_subscriptions():
+    subscription_file = open('subscriptions', 'ab')
+    pickle.dump(subscription_list,subscription_file)
+    subscription_file.close()
+
+
+
+def send_reminders():
+    tomorrow = date1.date() + timedelta(days=2)
+    if str(tomorrow) in events:
+        embed = discord.Embed(title="Upcoming Event Reminder", description="CIS 4398", color=0xA71313)
+        embed.set_footer(text="CIS 4398 - Icebreaker Group 4", icon_url=PIC)
+        embed.description = events[f"{tomorrow}"]
+        for ID in subscription_list:
+            #member = client.get_user(ID)
+            #await member.send(embed=embed)
+
+send_reminders()
+subscription_list.append('1223233')
+save_subscriptions()
+send_reminders()
 
 
 @client.event
@@ -82,4 +122,37 @@ async def on_message(message):
 
     await message.send(embed=embed)
 
+@client.command(name='subscribe')
+async def on_message(message):
+    embed = discord.Embed(title="Event Reminders", description="CIS 4398", color=0xA71313)
+    embed.set_footer(text="CIS 4398 - Icebreaker Group 4", icon_url=PIC)
+
+    if message.author.id not in subscription_list:
+        subscription_list.append(message.author.id)
+        save_subscriptions()
+
+        embed.description = f"{message.author.name} has subscribed to reminders"
+    else:
+        embed.description = f"{message.author.name} is already subscribed to reminders!"
+
+    await message.send(embed=embed)
+
+@client.command(name='unsubscribe')
+async def on_message(message):
+    embed = discord.Embed(title="Event Reminder Unsubscription", description="CIS 4398", color=0xA71313)
+    embed.set_footer(text="CIS 4398 - Icebreaker Group 4", icon_url=PIC)
+
+    if message.author.id not in subscription_list:
+
+        save_subscriptions()
+
+        embed.description = f"{message.author.name} has not subscribed to reminders!"
+    else:
+        subscription_list.remove(message.author.id)
+        embed.description = f"{message.author.name} has unsubscribed from reminders"
+
+    await message.send(embed=embed)
+
+
 client.run(bot_token)
+
