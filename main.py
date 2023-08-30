@@ -161,7 +161,13 @@ async def on_message(message):
 
     await message.send(embed=embed)
     
+@client.command(name = 'Holidays')
+async def on_message(message):
+    embed = discord.Embed(title="Holidays", description="Labor Day Sept 4 \nWellness Day Oct 13 \nFall Break Nov 20- Nov 26", color=0xA71313)
+    embed.set_footer(text="CIS 4398 - Icebreaker Group 4", icon_url=PIC)
 
+
+    await message.send(embed=embed)
 
 
 client.run(bot_token)
