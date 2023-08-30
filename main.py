@@ -73,7 +73,7 @@ def save_subscriptions():
 
 @tasks.loop(hours=24)
 async def send_reminders():
-    tomorrow = date1.date() + timedelta(days=1)
+    tomorrow = date1.date() + timedelta(days=2)
     if str(tomorrow) in events:
         embed = discord.Embed(title="Upcoming Event Reminder", description="CIS 4398", color=0xA71313)
         embed.set_footer(text="CIS 4398 - Icebreaker Group 4", icon_url=PIC)
@@ -132,7 +132,7 @@ async def on_message(message):
 
         embed.description = f"{message.author.name} has subscribed to reminders"
 
-        tomorrow = date1.date() + timedelta(days=1)
+        tomorrow = date1.date() + timedelta(days=2)
         if str(tomorrow) in events:
             sub_embed = discord.Embed(title="Upcoming Event Reminder", description="CIS 4398", color=0xA71313)
             sub_embed.set_footer(text="CIS 4398 - Icebreaker Group 4", icon_url=PIC)
