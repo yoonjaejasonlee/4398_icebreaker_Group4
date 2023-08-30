@@ -33,7 +33,7 @@ text = ""
 this_week = ""
 
 next_class = ""
-next_lab = ""
+#next_lab = ""
 
 subscription_list = []
 events = {}
@@ -53,7 +53,7 @@ for i in range(len(data['events'])):
 
     class_type = data['events'][i]['class_type']
     if class_type == "Lecture" and date_difference.days / 24.0 >= 0 and not next_class:
-        line2 = f"{data['events'][i]['event_name']}\n{data['events'][i]['event_description']}\n\nhttps://temple.zoom.us/j/99844332204"
+        line2 = f"**{data['events'][i]['event_name']}**\n{data['events'][i]['event_description']}\n\nhttps://temple.zoom.us/j/99844332204"
         next_class += line2
 
 
